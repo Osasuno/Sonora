@@ -1,0 +1,41 @@
+# render.yaml — publicacao do Sonora no Render (Blueprint).
+#
+# Banco: Postgres do Supabase, pela string do "Session pooler" (porta 5432).
+# Valores secretos nao ficam aqui: DATABASE_URL e ADMIN_BOOTSTRAP_PASSWORD sao
+# pedidos pelo Render na criacao do Blueprint, e SESSION_SECRET e' gerado por ele.
+
+services:
+  - type: web
+    name: sonora
+    runtime: node
+    plan: free
+    region: virginia
+    branch: main
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_TITULO
+        value: Sonora
+
+      # postgresql://postgres.<ref>:<senha>@aws-<n>-<regiao>.pooler.supabase.com:5432/postgres
+      - key: DATABASE_URL
+        sync: false
+      # Schema proprio, fora do `public` exposto pela Data API do Supabase.
+      - key: APP_SCHEMA
+        value: sonora
+      - key: DATABASE_SSL
+        value: require
+
+      # O MusicBrainz exige identificacao (URL ou e-mail) no User-Agent.
+      - key: MUSICBRAINZ_CONTACT
+        value: https://github.com/Osasuno/Sonora
+
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_BOOTSTRAP_USER
+        value: admin
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false

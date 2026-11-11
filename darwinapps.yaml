@@ -1,0 +1,86 @@
+# darwinapps.yaml — registro da configuracao de publicacao.
+#
+# O escopo (secao 29) ainda nao decidiu a hospedagem. Este arquivo fica pronto
+# para o caso de publicar na plataforma interna (Geno): serve de checklist das
+# variaveis e da configuracao, para nao precisar reabrir o portal so para lembrar.
+# Se a hospedagem escolhida for outra, o unico conteudo aproveitavel daqui e' a
+# lista de variaveis de ambiente.
+
+app:
+  name: sonora # /^[a-z][a-z0-9-]*$/ — 3 a 53 caracteres
+  type: nodejs # detectado por package.json na raiz; entry point server.js
+  environment: production # confirmar antes de criar o app no portal
+
+resources:
+  cpu: 0.5 # vCPU
+  memory: 512 # MiB
+  replicas: 1
+  port: 8000 # porta do SERVIDOR WEB — nunca 5432
+
+env:
+  - key: NODE_ENV
+    value: production
+    sensitive: false
+
+  - key: APP_TITULO
+    value: "Sonora"
+    sensitive: false
+
+  # O Geno sobrescreve PORT com 5432 quando o banco e' provisionado. O codigo le
+  # WEB_PORT primeiro justamente para nao cair nessa armadilha. No portal:
+  # corrija PORT para 8000 e remova as genericas HOST, USER e PASSWORD.
+  - key: WEB_PORT
+    value: "8000"
+    sensitive: false
+
+  - key: DATABASE_URL
+    value: "" # injetada pelo Geno ao provisionar o banco
+    sensitive: false
+
+  # Banco dedicado em producao: o schema pode ser o padrao.
+  - key: APP_SCHEMA
+    value: public
+    sensitive: false
+
+  - key: DATABASE_SSL
+    value: "" # "require" quando o banco exigir TLS
+    sensitive: false
+
+  # O MusicBrainz exige um contato no User-Agent de quem consome a API.
+  - key: MUSICBRAINZ_CONTACT
+    value: ""
+    sensitive: false
+
+  - key: SESSION_SECRET
+    value: "" # string aleatoria longa — preencher no portal
+    sensitive: true
+
+  - key: ADMIN_BOOTSTRAP_USER
+    value: admin
+    sensitive: false
+
+  - key: ADMIN_BOOTSTRAP_PASSWORD
+    value: "" # senha do primeiro administrador — preencher no portal
+    sensitive: true
+
+  # Opcional. Sem valor, o admin inicial nasce com <usuario>@sonora.invalid.
+  - key: ADMIN_BOOTSTRAP_EMAIL
+    value: ""
+    sensitive: false
+
+  # Vazio = nenhuma origem externa pode chamar a API. Deixe assim.
+  - key: CORS_ORIGINS
+    value: ""
+    sensitive: false
+
+  # DEMO_MODE nao aparece aqui de proposito: ele e' ignorado quando
+  # NODE_ENV=production ou quando existe DATABASE_URL. Modo demonstracao e'
+  # exclusivo de desenvolvimento local.
+
+database:
+  engine: postgresql # postgresql | mysql
+  version: "15"
+  name: sonora # /^[a-z][a-z0-9_]{2,31}$/
+  inject_url_as: DATABASE_URL
+# Sem buckets: a plataforma nao armazena arquivos. As capas vem por URL do Cover
+# Art Archive e sao carregadas pelo navegador; nada e' baixado nem salvo.

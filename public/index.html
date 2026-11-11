@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Sonora - plataforma social de musica: registre o que ouviu, avalie, escreva reviews, monte listas e construa sua identidade musical."
+    />
+    <title>Sonora</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <div id="app" class="app" hidden>
+      <header class="topbar" id="topbar"></header>
+      <main class="main" id="conteudo" tabindex="-1"></main>
+      <!--
+        Crédito em texto, sem âncora: a especificação proíbe link externo para
+        a MusicBrainz na interface (§46, §64). A atribuição continua visível.
+      -->
+      <footer class="rodape">
+        <p>
+          Sonora — metadados do catálogo por MusicBrainz e capas por Cover Art Archive.
+          A plataforma não reproduz música.
+        </p>
+      </footer>
+    </div>
+
+    <div id="tela-login" class="login-shell" hidden></div>
+
+    <div id="boot" class="boot">
+      <div class="boot-mark" aria-hidden="true"></div>
+      <p class="boot-texto">carregando o Sonora...</p>
+    </div>
+
+    <div id="modais" class="modais"></div>
+    <div id="avisos" class="avisos" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>
