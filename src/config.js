@@ -21,6 +21,12 @@ function resolveWebPort() {
   return Number.isInteger(port) && port > 0 && port < 65536 ? port : 8000;
 }
 
+/** Saltos de proxy confiaveis: inteiro de 1 a 5, padrao 1. */
+function resolveTrustProxyHops() {
+  const hops = Number.parseInt(process.env.TRUST_PROXY_HOPS || "1", 10);
+  return Number.isInteger(hops) && hops >= 1 && hops <= 5 ? hops : 1;
+}
+
 const isProduction = process.env.NODE_ENV === "production";
 
 const config = {
@@ -48,6 +54,11 @@ const config = {
     // admin inicial tambem precisa de um endereco.
     email: process.env.ADMIN_BOOTSTRAP_EMAIL || "",
   },
+
+  // Proxies entre o cliente e o app, para o IP real sair do X-Forwarded-For.
+  // Padrao 1 (ingress do Geno). No Render sao 2: com 1, o rate limit separava
+  // as pessoas pelo IP do proxy, e nao pelo IP de quem acessa.
+  trustProxyHops: resolveTrustProxyHops(),
 
   corsOrigins: (process.env.CORS_ORIGINS || "")
     .split(",")

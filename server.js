@@ -15,9 +15,10 @@ const { HttpError } = require("./src/routes/helpers");
 
 const app = express();
 
-// Atras do ingress do cluster o IP real vem no X-Forwarded-For. Um salto so,
-// para o rate limiting nao ser burlado por header falsificado.
-if (config.isProduction) app.set("trust proxy", 1);
+// Atras de proxy o IP real vem no X-Forwarded-For. Confia so no numero exato de
+// saltos (TRUST_PROXY_HOPS), para o rate limiting nao ser burlado por header
+// falsificado.
+if (config.isProduction) app.set("trust proxy", config.trustProxyHops);
 app.disable("x-powered-by");
 
 // ─────────────────────────────────────────────────────────────────────────────
