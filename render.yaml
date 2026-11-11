@@ -23,10 +23,11 @@ services:
       # navegador e o "hoje" vira amanha a partir das 21h no Brasil.
       - key: TZ
         value: America/Sao_Paulo
-      # Dois proxies na frente do app no Render. Com 1, o rate limit agrupava
-      # as pessoas pelo IP do proxy.
+      # Tres proxies na frente do app no Render (medido). Com menos, o rate
+      # limit agrupava as pessoas pelo IP de um proxy; com mais, aceitaria
+      # X-Forwarded-For forjado.
       - key: TRUST_PROXY_HOPS
-        value: "2"
+        value: "3"
 
       # postgresql://postgres.<ref>:<senha>@aws-<n>-<regiao>.pooler.supabase.com:5432/postgres
       - key: DATABASE_URL

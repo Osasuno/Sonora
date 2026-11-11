@@ -56,8 +56,8 @@ const config = {
   },
 
   // Proxies entre o cliente e o app, para o IP real sair do X-Forwarded-For.
-  // Padrao 1 (ingress do Geno). No Render sao 2: com 1, o rate limit separava
-  // as pessoas pelo IP do proxy, e nao pelo IP de quem acessa.
+  // Padrao 1 (ingress do Geno). No Render sao 3, medidos: com menos, o rate
+  // limit separava as pessoas pelo IP de um proxy, e nao pelo IP de quem acessa.
   trustProxyHops: resolveTrustProxyHops(),
 
   corsOrigins: (process.env.CORS_ORIGINS || "")
