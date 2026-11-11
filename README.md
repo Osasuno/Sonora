@@ -261,6 +261,7 @@ Para conferir, `https://<serviço>.onrender.com/api/status` deve responder com
 | `SESSION_SECRET` | gerado pelo Render |
 | `ADMIN_BOOTSTRAP_USER` / `ADMIN_BOOTSTRAP_PASSWORD` | primeiro administrador |
 | `MUSICBRAINZ_CONTACT` | URL deste repositório |
+| `TZ` | `America/Sao_Paulo`: o Render roda em UTC e as datas de escuta sairiam um dia antes |
 
 No plano gratuito, o Render desliga o serviço depois de 15 minutos sem acesso, e a
 primeira visita seguinte leva cerca de um minuto para abrir.

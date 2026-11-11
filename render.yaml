@@ -19,6 +19,10 @@ services:
         value: production
       - key: APP_TITULO
         value: Sonora
+      # O Render roda em UTC. Sem isto, datas de escuta aparecem um dia antes no
+      # navegador e o "hoje" vira amanha a partir das 21h no Brasil.
+      - key: TZ
+        value: America/Sao_Paulo
 
       # postgresql://postgres.<ref>:<senha>@aws-<n>-<regiao>.pooler.supabase.com:5432/postgres
       - key: DATABASE_URL

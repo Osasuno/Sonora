@@ -20,12 +20,22 @@ const PROJECAO = `
     JOIN releases r ON r.id = l.release_id
     JOIN artists  a ON a.id = r.artist_id`;
 
+/**
+ * Hoje no fuso do processo (variavel TZ), em AAAA-MM-DD. A escuta automatica
+ * (§28) nao usa o `current_date` do banco: o Postgres do Supabase roda em UTC e,
+ * a partir das 21h no Brasil, ja seria o dia seguinte.
+ */
+function hojeNoFuso() {
+  const agora = new Date();
+  return new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
 const criar = (userId, releaseId, listenedOn = null) =>
   db.one(
     `INSERT INTO listens (user_id, release_id, listened_on)
-     VALUES ($1, $2, COALESCE($3::date, current_date))
+     VALUES ($1, $2, $3::date)
      RETURNING id, listened_on`,
-    [userId, releaseId, listenedOn]
+    [userId, releaseId, listenedOn || hojeNoFuso()]
   );
 
 async function remover(listenId, userId) {
