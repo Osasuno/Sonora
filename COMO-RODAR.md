@@ -293,7 +293,8 @@ entra no catálogo nesse momento.
 O site publicado roda no Render e usa o mesmo banco do Supabase. O passo a passo
 está no [README](README.md#publicação-render--supabase): botão **Deploy to
 Render**, a URI do Session pooler em `DATABASE_URL` e uma senha para o primeiro
-administrador. Depois disso, cada push na branch `main` publica de novo.
+administrador. Com o GitHub conectado ao Render, cada push na branch `main`
+publica de novo; sem essa conexão, use **Manual Deploy** no painel do serviço.
 
 ---
 

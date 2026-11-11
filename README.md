@@ -250,7 +250,9 @@ banco e ao MusicBrainz.
    usuário `admin` é criado.
 
 Para conferir, `https://<serviço>.onrender.com/api/status` deve responder com
-`"dadosProntos": true`. Cada push na branch `main` publica de novo.
+`"dadosProntos": true`. Com o GitHub conectado ao Render, cada push na branch
+`main` publica de novo. Sem essa conexão, publique pelo botão **Manual Deploy**
+do serviço.
 
 | Variável | Valor em produção |
 |---|---|
