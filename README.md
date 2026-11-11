@@ -239,8 +239,8 @@ banco e ao MusicBrainz.
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Osasuno/Sonora)
 
 1. No Supabase, clique em **Connect**, escolha **Session pooler**, copie a URI e
-   troque `[YOUR-PASSWORD]` pela senha do banco. A senha fica em
-   **Project Settings → Database**, onde também dá para redefini-la.
+   troque `[YOUR-PASSWORD]` pela senha do banco. Se não lembrar a senha,
+   redefina em **Database → Settings**.
 2. Clique no botão acima, ou, no Render, use **New → Blueprint** e escolha este
    repositório. O serviço está descrito em [`render.yaml`](render.yaml).
 3. O Render pede dois valores: `DATABASE_URL`, que é a URI do passo 1, e

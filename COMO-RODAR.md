@@ -214,7 +214,7 @@ O banco do projeto é o Postgres do Supabase. No painel do projeto:
 2. Escolha **Session pooler** e copie a URI. Ela tem este formato:
    `postgresql://postgres.<ref>:[YOUR-PASSWORD]@aws-<n>-<regiao>.pooler.supabase.com:5432/postgres`
 3. Troque `[YOUR-PASSWORD]` pela senha do banco. Se não lembrar, redefina em
-   **Project Settings → Database**.
+   **Database → Settings**.
 
 Use o **Session pooler**, e não o *Transaction pooler* (porta 6543) nem a conexão
 direta. O modo transação perde o `search_path` e o lock de migração, e a conexão
