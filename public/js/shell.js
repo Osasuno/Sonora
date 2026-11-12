@@ -9,11 +9,15 @@ import { ir } from "./router.js";
 import { limparSessao, souAdmin, usuarioAtual } from "./state.js";
 import { avatar, el, icone, trocar } from "./ui.js";
 
+// `secao` liga o link a secao da tela atual (marcarLinkAtivo); `icone` e' o da
+// barra de baixo do celular.
 const LINKS = [
-  { href: "/pesquisa", rotulo: "Pesquisar" },
-  { href: "/", rotulo: "No Sonora" },
-  { href: "/listas", rotulo: "Listas" },
+  { href: "/pesquisa", rotulo: "Pesquisar", secao: "pesquisa", icone: "busca" },
+  { href: "/", rotulo: "No Sonora", secao: "catalogo", icone: "disco" },
+  { href: "/listas", rotulo: "Listas", secao: "listas", icone: "listas" },
 ];
+
+const caminhoDoPerfil = (eu) => `/u/${encodeURIComponent(eu.username)}`;
 
 let menuAberto = null;
 
@@ -45,7 +49,7 @@ function abrirMenu(ancora) {
   }
 
   const eu = usuarioAtual();
-  const meuPerfil = `/u/${encodeURIComponent(eu.username)}`;
+  const meuPerfil = caminhoDoPerfil(eu);
 
   const menu = el(
     "div",
@@ -126,34 +130,63 @@ export function montarTopbar() {
 
   trocar(
     anfitriao,
-    el("a", { class: "marca", href: "/" }, el("span", { class: "marca-disco" }), "Sonora"),
+    el(
+      "a",
+      // O nome some em tela muito estreita (CSS); o rotulo garante o nome do link.
+      { class: "marca", href: "/", "aria-label": "Sonora, página inicial" },
+      el("span", { class: "marca-disco" }),
+      el("span", { class: "marca-texto", text: "Sonora" })
+    ),
     el(
       "nav",
       { class: "nav-links", "aria-label": "Navegação principal" },
-      LINKS.map((link) => el("a", { class: "nav-link", href: link.href, text: link.rotulo }))
+      LINKS.map((link) =>
+        el("a", { class: "nav-link", href: link.href, text: link.rotulo, dataset: { secao: link.secao } })
+      )
     ),
     busca,
     botaoEu
   );
 
+  montarNavInferior(eu);
   marcarLinkAtivo(window.location.pathname);
+}
+
+/**
+ * Barra fixa embaixo, so no celular (o CSS esconde no desktop). La os links do
+ * topo somem por falta de espaco, e sem esta barra a pagina de Listas ficava
+ * sem caminho.
+ */
+function montarNavInferior(eu) {
+  const anfitriao = document.getElementById("nav-inferior");
+  if (!anfitriao) return;
+
+  const item = ({ href, rotulo, secao }, simbolo) =>
+    el("a", { class: "nav-inferior-link", href, dataset: { secao } }, simbolo, el("span", { text: rotulo }));
+
+  trocar(
+    anfitriao,
+    LINKS.map((link) => item(link, icone(link.icone, 22))),
+    item({ href: caminhoDoPerfil(eu), rotulo: "Perfil", secao: "perfil" }, avatar(eu, "p"))
+  );
+}
+
+/** Em que secao da navegacao esta o caminho (vale para o topo e para a barra de baixo). */
+function secaoDe(caminho) {
+  if (caminho.startsWith("/pesquisa") || caminho.startsWith("/cadastro-manual")) return "pesquisa";
+  if (caminho.startsWith("/lista")) return "listas";
+  if (caminho === "/" || caminho.startsWith("/obra") || caminho.startsWith("/artista")) return "catalogo";
+
+  const eu = usuarioAtual();
+  if (eu && caminho.replace(/\/$/, "") === caminhoDoPerfil(eu)) return "perfil";
+  return "";
 }
 
 /** Destaca o link da secao em que estamos. */
 export function marcarLinkAtivo(caminho) {
-  for (const link of document.querySelectorAll("#topbar .nav-link")) {
-    const href = link.getAttribute("href");
-
-    let ativo;
-    if (href === "/") {
-      ativo = caminho === "/" || caminho.startsWith("/obra") || caminho.startsWith("/artista");
-    } else if (href === "/pesquisa") {
-      ativo = caminho.startsWith("/pesquisa") || caminho.startsWith("/cadastro-manual");
-    } else {
-      ativo = caminho.startsWith(href);
-    }
-
-    if (ativo) link.setAttribute("aria-current", "page");
+  const secao = secaoDe(caminho);
+  for (const link of document.querySelectorAll("#topbar .nav-link, #nav-inferior .nav-inferior-link")) {
+    if (link.dataset.secao === secao) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   }
 }

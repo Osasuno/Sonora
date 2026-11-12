@@ -35,10 +35,14 @@ auth.setupSession(app);
 
 // Arquivos da interface (HTML, CSS, JS). Nao contem dado nenhum: tudo o que e'
 // informacao passa pela API autenticada abaixo.
+// `index: false`: "/" nao sai daqui com cache de 1 hora; cai na rota da SPA
+// abaixo, que manda o index.html para ser revalidado a cada visita. Assim, depois
+// de uma publicacao, ninguem fica com o HTML antigo.
 app.use(
   express.static(path.join(__dirname, "public"), {
     maxAge: config.isProduction ? "1h" : 0,
     etag: true,
+    index: false,
   })
 );
 

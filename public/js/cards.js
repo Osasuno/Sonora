@@ -77,23 +77,30 @@ export function cartaoObra(bruto, opcoes = {}) {
   return el(
     "article",
     { class: "card-obra" },
+    // Capa e botoes rapidos num bloco proprio: os botoes nao podem morar dentro
+    // do link, e posicionados pelo cartao inteiro eles caiam em cima das
+    // estrelas, e nao da capa.
     el(
-      "a",
-      {
-        href: linkObra(obra),
-        class: "capa-wrap",
-        "aria-label": `${obra.title}, ${rotuloDoTipo(obra.type)} de ${obra.artistName}`,
-      },
-      capa(obra.coverUrl, `Capa de ${obra.title}`),
-      posicao ? el("span", { class: "medalha-posicao", text: `#${posicao}` }) : null,
-      el("span", {
-        class: `marca-tipo tipo-${String(obra.type || "").toLowerCase()}`,
-        text: rotuloDoTipo(obra.type),
-      }),
-      // §46: a origem aparece ja no cartao, sem link para fora.
-      obra.origin === "MANUAL" ? el("span", { class: "marca-manual", text: "manual" }) : null
+      "div",
+      { class: "capa-area" },
+      el(
+        "a",
+        {
+          href: linkObra(obra),
+          class: "capa-wrap",
+          "aria-label": `${obra.title}, ${rotuloDoTipo(obra.type)} de ${obra.artistName}`,
+        },
+        capa(obra.coverUrl, `Capa de ${obra.title}`),
+        posicao ? el("span", { class: "medalha-posicao", text: `#${posicao}` }) : null,
+        el("span", {
+          class: `marca-tipo tipo-${String(obra.type || "").toLowerCase()}`,
+          text: rotuloDoTipo(obra.type),
+        }),
+        // §46: a origem aparece ja no cartao, sem link para fora.
+        obra.origin === "MANUAL" ? el("span", { class: "marca-manual", text: "manual" }) : null
+      ),
+      acoes
     ),
-    acoes,
     el(
       "div",
       { class: "card-meta" },

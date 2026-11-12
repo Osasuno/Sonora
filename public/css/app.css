@@ -44,6 +44,18 @@
   --gap: 16px;
   --largura: 1240px;
   --topbar-h: 64px;
+  --nav-inferior-h: 58px;
+
+  /* Campos: uma altura e uma fonte para todo input e select */
+  --campo-h: 44px;
+  --campo-h-compacto: 38px;
+  --campo-fonte: 15px;
+  --campo-fonte-compacto: 0.88rem;
+
+  /* Área segura do iPhone (notch e barra de início); 0 fora dele */
+  --seguro-esq: env(safe-area-inset-left, 0px);
+  --seguro-dir: env(safe-area-inset-right, 0px);
+  --seguro-baixo: env(safe-area-inset-bottom, 0px);
 
   --fonte: "Segoe UI Variable Display", "Segoe UI", -apple-system,
     BlinkMacSystemFont, Inter, Roboto, "Helvetica Neue", system-ui, sans-serif;
@@ -87,10 +99,8 @@ a:hover {
   color: var(--coral);
 }
 
-button,
-input,
-select,
-textarea {
+/* :where() zera a especificidade, para o visual dos campos (abaixo) vencer. */
+:where(button, input, select, textarea) {
   font: inherit;
   color: inherit;
 }
@@ -182,14 +192,14 @@ p:last-child { margin-bottom: 0; }
   width: 100%;
   max-width: var(--largura);
   margin: 0 auto;
-  padding: 28px 24px 64px;
+  padding: 28px max(24px, var(--seguro-dir)) 64px max(24px, var(--seguro-esq));
 }
 
 .main:focus { outline: none; }
 
 .rodape {
   border-top: 1px solid var(--line);
-  padding: 24px;
+  padding: 24px max(24px, var(--seguro-dir)) 24px max(24px, var(--seguro-esq));
   color: var(--faint);
   font-size: 0.8rem;
   text-align: center;
@@ -207,8 +217,9 @@ p:last-child { margin-bottom: 0; }
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 24px;
+  padding: 0 max(24px, var(--seguro-dir)) 0 max(24px, var(--seguro-esq));
   background: rgba(8, 8, 10, 0.82);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
@@ -277,6 +288,7 @@ p:last-child { margin-bottom: 0; }
 .busca-topo input:focus {
   border-color: var(--line-strong);
   background: var(--surface-3);
+  box-shadow: none;
   outline: none;
 }
 
@@ -329,6 +341,7 @@ p:last-child { margin-bottom: 0; }
   text-transform: uppercase;
 }
 
+.avatar.p { width: 22px; height: 22px; font-size: 0.6rem; }
 .avatar.g { width: 40px; height: 40px; font-size: 1rem; }
 .avatar.gg { width: 84px; height: 84px; font-size: 2rem; }
 
@@ -336,7 +349,7 @@ p:last-child { margin-bottom: 0; }
 .menu {
   position: absolute;
   top: calc(var(--topbar-h) - 8px);
-  right: 24px;
+  right: max(24px, var(--seguro-dir));
   min-width: 210px;
   background: var(--surface-2);
   border: 1px solid var(--line-strong);
@@ -394,7 +407,10 @@ p:last-child { margin-bottom: 0; }
   color: #fff;
 }
 
-.btn.primario:hover:not(:disabled) { filter: brightness(1.1); }
+/* O fundo é repetido no hover porque a regra genérica .btn:hover tem especificidade
+   maior que .btn.primario: sem isto o botão ficava cinza com o mouse por cima e,
+   no celular, onde o hover fica preso depois do toque, cinza até tocar em outro lugar. */
+.btn.primario:hover:not(:disabled) { background: var(--coral); filter: brightness(1.1); }
 
 .btn.fantasma { background: transparent; border-color: var(--line); color: var(--muted); }
 .btn.fantasma:hover:not(:disabled) { color: var(--text); border-color: var(--line-strong); }
@@ -402,7 +418,8 @@ p:last-child { margin-bottom: 0; }
 .btn.perigo { color: var(--perigo); border-color: rgba(255, 85, 102, 0.35); background: transparent; }
 .btn.perigo:hover:not(:disabled) { background: rgba(255, 85, 102, 0.12); }
 
-.btn.ativo { border-color: var(--coral); color: var(--coral); background: var(--coral-soft); }
+.btn.ativo,
+.btn.ativo:hover:not(:disabled) { border-color: var(--coral); color: var(--coral); background: var(--coral-soft); }
 
 .btn.pequeno { height: 32px; padding: 0 12px; font-size: 0.82rem; }
 .btn.largo { width: 100%; }
@@ -427,7 +444,75 @@ p:last-child { margin-bottom: 0; }
 
 /* ─── Campos ────────────────────────────────────────────────────────────── */
 
-.campo { display: grid; gap: 6px; }
+/*
+ * Um visual só para campo de texto, número, busca, select e textarea, dentro
+ * ou fora de .campo. Antes o Safari desenhava o <select> com o controle nativo
+ * do macOS (fino, 22px de altura) ao lado de campos com caixa, e o comentário
+ * do item de lista, fora de .campo, nem tinha estilo.
+ *
+ * :where() zera a especificidade: componentes com visual próprio, como a busca
+ * do topo, continuam valendo por cima.
+ */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]), select, textarea) {
+  width: 100%;
+  min-width: 0;
+  height: var(--campo-h);
+  padding: 0 13px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--campo-fonte);
+  line-height: 1.4;
+  transition: border-color var(--transicao), background-color var(--transicao), box-shadow var(--transicao);
+}
+
+:where(input, textarea)::placeholder { color: var(--faint); opacity: 1; }
+
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]), select, textarea):focus {
+  border-color: var(--coral);
+  background-color: var(--surface-2);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+  outline: none;
+}
+
+:where(input, select, textarea):disabled { opacity: 0.55; cursor: not-allowed; }
+
+:where(textarea) {
+  height: auto;
+  min-height: 110px;
+  padding: 10px 13px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* Select sem a aparência nativa, com a seta desenhada aqui (a mesma do ícone seta_baixo). */
+:where(select) {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239d9dab' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 15px 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+:where(select) option { background-color: var(--surface-2); color: var(--text); }
+
+/* Número sem as setinhas do navegador: o ano se digita, e no celular o teclado já é numérico. */
+:where(input[type="number"]) { -moz-appearance: textfield; appearance: textfield; }
+
+:where(input[type="number"])::-webkit-inner-spin-button,
+:where(input[type="number"])::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Busca: sem o arredondado nativo do WebKit, mantendo o botão de limpar. */
+:where(input[type="search"]) { -webkit-appearance: textfield; appearance: textfield; }
+:where(input[type="search"])::-webkit-search-decoration { -webkit-appearance: none; }
+
+.campo { display: grid; gap: 6px; min-width: 0; }
 
 .campo > label,
 .rotulo {
@@ -438,31 +523,18 @@ p:last-child { margin-bottom: 0; }
   text-transform: uppercase;
 }
 
-.campo input,
-.campo textarea,
-.campo select {
-  width: 100%;
-  padding: 10px 13px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  transition: var(--transicao);
-}
-
-.campo input:focus,
-.campo textarea:focus,
-.campo select:focus {
-  border-color: var(--coral);
-  background: var(--surface-2);
-  outline: none;
-}
-
-.campo textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
 .campo .dica { font-size: 0.78rem; color: var(--faint); text-transform: none; letter-spacing: 0; }
 
 .campo.compacto > label { font-size: 0.72rem; }
-.campo.compacto input,
-.campo.compacto select { padding: 7px 10px; font-size: 0.88rem; }
+
+.compacto :where(input:not([type="checkbox"], [type="radio"]), select) {
+  height: var(--campo-h-compacto);
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: var(--campo-fonte-compacto);
+}
+
+.compacto :where(select) { padding-right: 32px; background-position: right 10px center; }
 .campo.compacto.estreito { max-width: 110px; }
 
 .linha-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -528,6 +600,11 @@ p:last-child { margin-bottom: 0; }
   border-radius: var(--r-md);
 }
 
+/* Botão que abre e fecha o painel de filtros; só aparece no celular. */
+.filtros-alternar { display: none; }
+.filtros-alternar .seta { margin-left: auto; display: inline-flex; transition: transform var(--transicao); }
+.filtros-alternar[aria-expanded="true"] .seta { transform: rotate(180deg); }
+
 .catalogo-resumo { margin-bottom: 16px; }
 
 .paginacao {
@@ -550,6 +627,10 @@ p:last-child { margin-bottom: 0; }
 
 .card-obra { position: relative; }
 
+/* Capa + botões rápidos. Os botões não podem morar dentro do link da capa, então
+   este bloco é a referência de posição deles. */
+.capa-area { position: relative; transition: transform var(--transicao); }
+
 .capa-wrap {
   position: relative;
   aspect-ratio: 1;
@@ -561,10 +642,8 @@ p:last-child { margin-bottom: 0; }
   display: block;
 }
 
-.card-obra:hover .capa-wrap {
-  transform: translateY(-3px);
-  box-shadow: var(--sombra-md);
-}
+.card-obra:hover .capa-area { transform: translateY(-3px); }
+.card-obra:hover .capa-wrap { box-shadow: var(--sombra-md); }
 
 .capa-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -608,6 +687,7 @@ p:last-child { margin-bottom: 0; }
   gap: 6px;
   padding: 22px 8px 8px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.82), transparent);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
   opacity: 0;
   transition: var(--transicao);
 }
@@ -1264,7 +1344,15 @@ a.selo:hover { color: var(--coral); border-color: var(--coral); }
 
 .login-frase b { color: var(--text); font-weight: 600; }
 
-.login-painel { display: grid; place-content: center; padding: 48px; background: var(--bg); }
+/* A coluna encolhe com a tela: com place-content sozinho ela seguia a largura do
+   conteúdo e, no iPhone SE (320px), a caixa passava da borda. */
+.login-painel {
+  display: grid;
+  grid-template-columns: minmax(0, 380px);
+  place-content: center;
+  padding: 48px;
+  background: var(--bg);
+}
 .login-caixa { width: 100%; max-width: 380px; display: grid; gap: 18px; }
 .login-caixa .marca { font-size: 1.35rem; }
 .login-caixa h1 { font-size: 1.5rem; }
@@ -1343,6 +1431,8 @@ a.selo:hover { color: var(--coral); border-color: var(--coral); }
   font-size: 0.82rem;
   text-align: center;
   line-height: 1.45;
+  padding-left: max(20px, var(--seguro-esq));
+  padding-right: max(20px, var(--seguro-dir));
 }
 
 .faixa-demo b { color: var(--violet); font-weight: 650; }
@@ -1426,41 +1516,6 @@ a.selo:hover { color: var(--coral); border-color: var(--coral); }
 .texto-faint { color: var(--faint); font-size: 0.85rem; }
 .divisor { height: 1px; background: var(--line); }
 
-/* ─── Responsivo ────────────────────────────────────────────────────────── */
-
-@media (max-width: 1024px) {
-  .obra-colunas { grid-template-columns: 1fr; gap: 28px; }
-  .login-shell { grid-template-columns: 1fr; }
-  .login-arte { display: none; }
-}
-
-@media (max-width: 860px) {
-  .topbar { gap: 10px; padding: 0 14px; }
-  .nav-links { display: none; }
-  .eu-nome { display: none; }
-  .eu { padding: 4px; border-color: transparent; }
-  .main { padding: 20px 14px 48px; }
-  .obra-topo { grid-template-columns: 1fr; gap: 20px; }
-  .obra-capa { width: min(200px, 60vw); }
-  .grade { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 18px 12px; }
-  .linha-campos,
-  .linha-campos.tres { grid-template-columns: 1fr; }
-  .menu { right: 12px; }
-  .pesquisa-form { grid-template-columns: 1fr; }
-  .grade-artistas { grid-template-columns: 1fr; }
-  .perfil-numeros { gap: 18px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 /* ─── Origem da obra (§46) ──────────────────────────────────────────────── */
 /* Badge, nunca link: a especificação proíbe apontar para fora.            */
 
@@ -1513,7 +1568,7 @@ a.selo:hover { color: var(--coral); border-color: var(--coral); }
   margin-top: 8px;
 }
 
-.pesquisa-form .btn { height: 42px; }
+.pesquisa-form .btn { height: var(--campo-h); }
 
 .grade-artistas {
   display: grid;
@@ -1641,3 +1696,159 @@ a.selo:hover { color: var(--coral); border-color: var(--coral); }
 
 /* Campo que ocupa a linha inteira do painel de filtros */
 .campo.compacto.largo { min-width: 240px; flex: 1 1 240px; }
+
+/* ─── Navegação inferior (celular) ──────────────────────────────────────── */
+/* No celular os links do topo somem por falta de espaço; esta barra os
+   substitui. Sem ela, a página de Listas ficava sem caminho no celular. */
+
+.nav-inferior { display: none; }
+
+/* ─── Responsivo ────────────────────────────────────────────────────────── */
+/* Fica no fim do arquivo de propósito: entre regras de mesma especificidade
+   vale a que vem depois. No meio do arquivo, as regras da pesquisa e do perfil
+   que vinham em seguida anulavam as versões de celular. */
+
+/* Campo com fonte menor que 16px faz o Safari do iPhone dar zoom ao focar. */
+@media (max-width: 860px), (pointer: coarse) {
+  :root {
+    --campo-fonte: 16px;
+    --campo-fonte-compacto: 16px;
+    --campo-h-compacto: 44px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .obra-colunas { grid-template-columns: 1fr; gap: 28px; }
+  .login-shell { grid-template-columns: 1fr; }
+  .login-arte { display: none; }
+}
+
+@media (max-width: 860px) {
+  .topbar { gap: 10px; padding: 0 max(14px, var(--seguro-dir)) 0 max(14px, var(--seguro-esq)); }
+  .nav-links { display: none; }
+  .eu-nome { display: none; }
+  .eu { padding: 4px; border-color: transparent; }
+  .menu { right: max(12px, var(--seguro-dir)); }
+  .main { padding: 20px max(14px, var(--seguro-dir)) 40px max(14px, var(--seguro-esq)); }
+
+  /* Barra de baixo. Fundo sólido e sem desfoque: o Safari do iOS 26 pinta a
+     própria barra com a cor do que está colado na borda de baixo. */
+  .app { padding-bottom: calc(var(--nav-inferior-h) + var(--seguro-baixo)); }
+
+  /* Abaixo da barra do topo (40): se o menu da pessoa descer até aqui, fica por cima. */
+  .nav-inferior {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 35;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: calc(var(--nav-inferior-h) + var(--seguro-baixo));
+    padding: 0 var(--seguro-dir) var(--seguro-baixo) var(--seguro-esq);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Vazia só se o JS que a preenche não rodou: melhor nenhuma barra que uma faixa sem links. */
+  .nav-inferior:empty { display: none; }
+
+  .nav-inferior-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    color: var(--faint);
+    font-size: 0.68rem;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-inferior-link > span:last-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-inferior-link:hover,
+  .nav-inferior-link[aria-current="page"] { color: var(--text); }
+  .nav-inferior-link[aria-current="page"] > svg { color: var(--coral); }
+  .nav-inferior-link[aria-current="page"] .avatar { box-shadow: 0 0 0 2px var(--bg-soft), 0 0 0 3.5px var(--coral); }
+
+  .avisos { bottom: calc(var(--nav-inferior-h) + var(--seguro-baixo) + 12px); }
+
+  /* Catálogo: o painel de filtros fica recolhido atrás de um botão, senão
+     ocupava a tela inteira antes do primeiro disco. */
+  .filtros-alternar { display: flex; width: 100%; height: 44px; margin-top: 14px; }
+
+  .filtros {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    margin: 10px 0 18px;
+  }
+
+  /* Quem manda é o botão logo antes do painel: fechado, o painel some. Sem o
+     botão (JS antigo ainda em cache logo depois de uma publicação), o painel
+     continua visível em vez de sumir sem jeito de abrir. */
+  .filtros-alternar[aria-expanded="false"] + .filtros { display: none; }
+  .filtros .campo.compacto.largo,
+  .filtros .campo.inteiro-no-celular,
+  .filtros > .btn { grid-column: 1 / -1; min-width: 0; }
+  .filtros .campo.compacto.estreito { max-width: none; }
+
+  .grade { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 18px 12px; }
+  .linha-campos,
+  .linha-campos.tres { grid-template-columns: 1fr; }
+
+  .obra-topo { grid-template-columns: 1fr; gap: 20px; }
+  .obra-capa { width: min(200px, 60vw); }
+
+  .pesquisa-form { grid-template-columns: 1fr; }
+  .pesquisa-form .btn { width: 100%; }
+  .grade-artistas { grid-template-columns: 1fr; }
+
+  /* Perfil: avatar e nome lado a lado, botão de editar numa linha própria.
+     Antes o botão passava da borda no iPhone SE. */
+  .perfil-identidade { flex-wrap: wrap; gap: 14px 16px; }
+  .perfil-identidade > div { flex: 1 1 0; min-width: 0; }
+  .perfil-identidade > .btn { flex: 1 0 100%; }
+  .perfil-identidade .avatar.gg { width: 64px; height: 64px; font-size: 1.5rem; }
+  .perfil-identidade h1 { font-size: 1.45rem; overflow-wrap: anywhere; }
+  .perfil-numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px; width: 100%; }
+
+  /* Editor de lista: os botões de ordem descem para uma linha própria e o
+     comentário ganha a largura toda. */
+  .editor-item { grid-template-columns: 22px 44px minmax(0, 1fr); gap: 10px; }
+  .editor-item-acoes { grid-column: 1 / -1; justify-content: flex-end; }
+
+  .tabela th,
+  .tabela td { padding: 10px 8px; }
+  .tabela .acoes { gap: 0; }
+
+  .login-painel { padding: 40px 20px; }
+  .veu { padding: 12px; }
+}
+
+/* iPhone SE e mini: o nome ao lado do disco sai para a busca caber. */
+@media (max-width: 380px) {
+  .topbar .marca-texto { display: none; }
+}
+
+/* Tela de toque: os botões rápidos do cartão só aparecem com o mouse por cima.
+   No celular ficavam invisíveis mas tocáveis, e registravam escuta sem querer. */
+@media (hover: none) {
+  .capa-acoes { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

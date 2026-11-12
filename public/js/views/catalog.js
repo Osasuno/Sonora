@@ -121,7 +121,11 @@ function chipsDeTipo(filtros, contagem) {
   );
 }
 
-function seletor({ id, rotulo, valor, opcoes, aoMudar, largo = false }) {
+/**
+ * `largo` ocupa mais espaco no desktop e a linha inteira no celular;
+ * `inteiroNoCelular` so ocupa a linha inteira no celular.
+ */
+function seletor({ id, rotulo, valor, opcoes, aoMudar, largo = false, inteiroNoCelular = false }) {
   const select = el(
     "select",
     { id, onChange: (evento) => aoMudar(evento.target.value) },
@@ -129,9 +133,10 @@ function seletor({ id, rotulo, valor, opcoes, aoMudar, largo = false }) {
   );
   select.value = valor;
 
+  const classes = ["campo", "compacto", largo && "largo", inteiroNoCelular && "inteiro-no-celular"];
   return el(
     "div",
-    { class: `campo compacto ${largo ? "largo" : ""}`.trim() },
+    { class: classes.filter(Boolean).join(" ") },
     el("label", { for: id, text: rotulo }),
     select
   );
@@ -140,6 +145,8 @@ function seletor({ id, rotulo, valor, opcoes, aoMudar, largo = false }) {
 function campoAno({ id, rotulo, valor, limites, extremo, aoMudar }) {
   const entrada = el("input", {
     type: "number",
+    // No celular abre o teclado so de digitos.
+    inputmode: "numeric",
     id,
     value: valor,
     min: limites.menor || 1860,
@@ -172,7 +179,7 @@ function painelDeFiltros(filtros, facetas) {
 
   return el(
     "div",
-    { class: "filtros" },
+    { class: "filtros", id: "painel-filtros" },
     seletor({
       id: "filtro-artista",
       rotulo: "Artista",
@@ -186,6 +193,7 @@ function painelDeFiltros(filtros, facetas) {
       rotulo: "Gênero",
       valor: filtros.genero,
       opcoes: generos,
+      inteiroNoCelular: true,
       aoMudar: (valor) => aplicar(filtros, { genero: valor }),
     }),
     campoAno({
@@ -236,6 +244,44 @@ function painelDeFiltros(filtros, facetas) {
         })
       : null
   );
+}
+
+// No celular o painel fica recolhido atras de um botao (o CSS esconde o botao no
+// desktop). Cada troca de filtro redesenha a tela, entao o estado aberto/fechado
+// mora aqui, fora da renderizacao.
+let painelAberto = false;
+
+const NO_PAINEL = ["artistId", "genero", "anoDe", "anoAte", "notaComunidadeMin", "minhaNotaMin"];
+
+/** Quantos ajustes do painel fogem do padrao: filtros e a ordenacao. */
+const ajustesNoPainel = (filtros) =>
+  NO_PAINEL.filter((chave) => filtros[chave]).length + (filtros.ordem !== "adicionados" ? 1 : 0);
+
+/**
+ * O CSS esconde o painel quando este botao, logo antes dele, esta com
+ * aria-expanded="false". O atributo e' a unica fonte do estado.
+ */
+function alternadorDoPainel(filtros) {
+  const ajustes = ajustesNoPainel(filtros);
+  const botao = el(
+    "button",
+    {
+      class: "btn filtros-alternar",
+      type: "button",
+      "aria-controls": "painel-filtros",
+      "aria-expanded": String(painelAberto),
+    },
+    icone("ajustes", 15),
+    "Filtros e ordem",
+    ajustes > 0 ? el("span", { class: "selo coral", text: String(ajustes) }) : null,
+    el("span", { class: "seta" }, icone("seta_baixo", 15))
+  );
+
+  botao.addEventListener("click", () => {
+    painelAberto = !painelAberto;
+    botao.setAttribute("aria-expanded", String(painelAberto));
+  });
+  return botao;
 }
 
 function paginacao(filtros, dados) {
@@ -312,6 +358,8 @@ export async function telaCatalogo(container, _parametros, query) {
       container,
       cabecalho,
       chipsDeTipo(filtros, facetas.tipos),
+      // O botao precisa vir imediatamente antes do painel (seletor "+" no CSS).
+      alternadorDoPainel(filtros),
       painelDeFiltros(filtros, facetas),
       resumo,
       dados.lancamentos.length > 0
